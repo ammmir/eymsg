@@ -16,9 +16,9 @@ The API has no knowledge of your users nor does it need to. However, to
 enable sending comment notifications via email and to allow replies, you
 will need to supply the following data for users:
 
-    * user id
-    * user display name
-    * email address
+  * user id
+  * user display name
+  * email address
 
 Note that `user id` is specific to your app. It is recommened that you use
 your internal database id or other primary key for the user. The API treats
