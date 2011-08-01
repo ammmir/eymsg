@@ -10,7 +10,7 @@ The base API adheres to REST principles and accepts and returns JSON.
 Most of the messaging functionality can also be accessed by including
 a JavaScript snippet on any page.
 
-## Mapping User Accounts for Email Support
+## Mapping User Accounts
 
 The API has no knowledge of your users nor does it need to. However, to
 enable sending comment notifications via email and to allow replies, you
@@ -23,6 +23,41 @@ will need to supply the following data for users:
 Note that `user id` is specific to your app. It is recommened that you use
 your internal database id or other primary key for the user. The API treats
 `user id`s as unique per application.
+
+### Listing Users
+
+    GET /users
+
+Returns:
+
+    {
+      count: 2,
+      users: ["1", "2"]
+    }
+
+### Creating/Updating a User
+
+    PUT /users/1
+    {
+      name: "Amir",
+      email: "amir@example.com"
+    }
+
+### Getting a User
+
+    GET /users/amir
+
+Returns:
+
+    {
+      id: "1",
+      name: "Amir",
+      email: "amir@example.com"
+    }
+
+### Removing a User
+
+    DELETE /users/1
 
 ## Creating/Modifying a Topic
 
@@ -122,7 +157,7 @@ In the latter case, a DELETE request would look like:
 
     GET /topics/foo/m1?_method=DELETE
 
-And A PUT request would look like:
+And a PUT request would look like:
 
     POST /topics/foo?_method=PUT
     {
