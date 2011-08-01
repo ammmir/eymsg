@@ -45,12 +45,11 @@ Returns:
 
 ### Getting a User
 
-    GET /users/amir
+    GET /users/1
 
 Returns:
 
     {
-      id: "1",
       name: "Amir",
       email: "amir@example.com"
     }
