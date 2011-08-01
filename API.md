@@ -58,7 +58,13 @@ Returns:
 
     DELETE /users/1
 
-## Creating/Modifying a Topic
+## Topics
+
+A topic is a list of messages identified by a key. The key can be any
+string, and is often an id or a URL. Namespacing topic keys is up to
+the application.
+
+### Creating/Modifying a Topic
 
 You don't explicitly need to create a topic, but creating one allows you
 to customize the defaults:
@@ -66,18 +72,15 @@ to customize the defaults:
     PUT /topics/foo
     {
         email_notifications: true,
-        email_replies: true
+        email_replies: true,
+        save_deleted_messages: false
     }
 
 The above will enable email notifications and replies. If you try to post
 a message into this topic and a `user id` doesn't have an email address
 associated with it, the request will fail.
 
-## Listing Topics
-
-A topic is a list of messages identified by a key. The key can be any
-string, and is often an id or a URL. Namespacing topic keys is up to
-the application.
+### Listing Topics
 
     GET /topics
 
@@ -90,7 +93,16 @@ Returns:
       ]
     }
 
-## Listing Messages in a Topic
+### Checking if a Topic Exists
+
+    HEAD /topics/foo
+
+## Messages
+
+Messages can be posted into any topic and topics don't need to be created
+ahead of time.
+
+### Listing Messages in a Topic
 
     GET /topics/foo
 
@@ -107,7 +119,12 @@ Returns:
       ]
     }
 
-## Listing Message Details
+If the `deleted=true` query parameter is used and if the topic has been
+configured to save deleted messages, they will appear in the results. Any
+deleted message will have a `deleted` key set to the date of deletion.
+Normal messages will have no `deleted` key.
+
+### Listing Message Details
 
     GET /topics/foo/m1
 
@@ -119,14 +136,10 @@ Returns:
       text: "test message."
     }
 
-## Removing a Message
+### Posting a Message
 
-    DELETE /topics/foo/m1
-
-## Posting a Message
-
-You may post a message into any topic. If the topic id doesn't exist, a
-new one will be created with defaults taken from your account.
+If the specified topic id doesn't exist, a new one will be created with
+defaults taken from your account.
 
     POST /topics/foo
     {
@@ -134,13 +147,13 @@ new one will be created with defaults taken from your account.
       text: "why was my message removed?"
     }
 
-## Checking if a Topic Exists
-
-    HEAD /topics/foo
-
-## Checking if a Message Exists
+### Checking if a Message Exists
 
     HEAD /topics/foo/m1
+
+### Removing a Message
+
+    DELETE /topics/foo/m1
 
 ## HTTP Response Codes
 
