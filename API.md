@@ -16,9 +16,9 @@ The API has no knowledge of your users nor does it need to. However, to
 enable sending comment notifications via email and to allow replies, you
 will need to supply the following data for users:
 
-  * user id
-  * user display name
-  * email address
+* user id
+* user display name
+* email address
 
 Note that `user id` is specific to your app. It is recommened that you use
 your internal database id or other primary key for the user. The API treats
@@ -166,6 +166,124 @@ since a PUT to an existing message will overwrite it.
 ### Removing a Message
 
     DELETE /topics/foo/m1
+
+## Notifications
+
+To know when someone posts a new message, for example, it's possible to
+poll the API for changes. Although this is allowed, it's not recommended
+since it is wasteful, inefficient, and subject to rate limits.
+
+Each notification follows the same format:
+
+    {
+      seq: "<unique sequence number>",
+      type: "<type of notification>",
+      action: "<create or remove>",
+      id: "<id of type>"
+    }
+
+The notification may also contain other fields, depending on the value
+of the `type` field.
+
+### WebSockets
+
+Connect to `wss://api.unnamed/` and send the following message:
+
+    {
+        auth: "<api key>"
+    }
+
+On successful authentication, the API will return:
+
+    {
+        auth: "success"
+    }
+
+You can now subscribe to events:
+
+    {
+      subscribe: [
+        {type: "message", topic: "<topic id>", actions: ["<action>", ...]},
+      ]
+    }
+
+To subscribe to all events, instead of sending an array, send a true
+boolean value.
+
+On success, the API will return:
+
+    {
+      subscribe: "success"
+    }
+
+After this, you will receive events as individual messages.
+
+To unsubscribe, send:
+
+    {
+      unsubscribe: [
+        {type: "message", topic: "<topic id>", actions: ["<action>", ...]},
+      ]
+    }
+
+To unsubscribe from all events, send a true boolean value instead of an
+array.
+
+To disconnect, unsubscribe from all events and close the connection.
+
+### Push Notifications (Web Hooks)
+
+With push notifications, the API will perform a POST request to a URL
+of your choosing anytime there are new messages. Notifications are batched,
+so that each POST request may contain multiple notifications. In the event
+that your server is down or returns a non-200 status code, the API will
+keep retrying over the next 24 hours. After that time, pending
+notifications will be discarded.
+
+The API will make a signed POST request:
+
+    POST /your/uri HTTP/1.1
+    Host: example.com
+    X-Unnamed-Api-Signature: <sha1 signature of POST body>
+
+    [
+      {seq: "1001", type: "topic", action: "create", id: "foo"},
+      {seq: "1002", type: "message", action: "create", id: "m1", from: "1"}
+    ]
+
+You are expected to return a 200 status code. If you return a response
+body, it will be ignored.
+
+### Continuous Updates
+
+If push notifications via web hooks aren't suitable for your application,
+then continuous updates (real-time push) is a great alternative. However,
+not all HTTP client libraries support it.
+
+With real-time push, your application makes a GET request to the API to
+wait for events. If there are no pending events, the API will send a
+single newline character (`\n`) to keep the connection open. To adjust
+the default of 10 seconds, use the `heartbeat` query string parameter.
+
+A special `/feed` URI prefix is used to "push-enable" any of the
+supported API endpoints.
+
+To get notified about topics:
+
+    GET /feed/topics?heartbeat=30
+
+To get all events:
+
+    GET /feed?heartbeat=15
+
+In the event that you get disconnected, make not of the last event's
+`since` value and send it on the next request:
+
+    GET /feed?since=1001&heartbeat=15
+
+Omitting the `since` will cause all historical events to be delivered
+again. However, the API currently will only return the past 10,000
+recent events
 
 ## HTTP Response Codes
 
