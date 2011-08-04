@@ -306,7 +306,7 @@ To get all events:
     GET /feed?heartbeat=15
 
 In the event that you get disconnected, make note of the last event's
-`since` value and send it on the next request:
+`seq` value and use it for the `since` parameter in the next request:
 
     GET /feed?since=1001&heartbeat=15
 
